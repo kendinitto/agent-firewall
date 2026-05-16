@@ -1,0 +1,195 @@
+# Agent Firewall Policy Configuration
+# Controls what the agent can and cannot access
+
+# File access rules
+files:
+  # Paths that are always blocked from reading
+  blocked_read_paths:
+    - ~/.ssh/
+    - ~/.aws/
+    - ~/.gnupg/
+    - ~/.config/gcloud/
+    - ~/.docker/config.json
+    - ~/.netrc
+    - ~/.env
+    - /etc/shadow
+    - /etc/passwd
+    - /.env
+
+  # File patterns that are always blocked from reading
+  blocked_read_patterns:
+    - "*.pem"
+    - "*.key"
+    - "*id_rsa*"
+    - "*id_ed25519*"
+    - "*secret*"
+    - "*credentials*"
+    - "*.env.*"
+    - "*token*"
+    - "*api_key*"
+    - "*apikey*"
+    - "*private*"
+
+  # Paths the agent is allowed to read (if not blocked above)
+  # Empty means all non-blocked paths are allowed
+  allowed_read_paths: []
+
+  # Paths the agent can write to
+  # Empty means all writes are allowed unless content inspection blocks them
+  allowed_write_paths: []
+
+# Network rules
+network:
+  # Domains the agent is allowed to make requests to
+  # Empty means all domains are scrutinized
+  trusted_domains:
+    - github.com
+    - api.github.com
+    - pypi.org
+    - pypi.python.org
+    - registry.npmjs.org
+    - crates.io
+    - docs.python.org
+    - stackoverflow.com
+    - developer.mozilla.org
+
+  # Domains that are always blocked
+  blocked_domains: []
+
+  # Methods that require extra scrutiny
+  # POST, PUT, PATCH with body content get content-inspected
+  scrutinize_methods:
+    - POST
+    - PUT
+    - PATCH
+
+  # Maximum allowed response size from agent web fetches (bytes)
+  max_fetch_size: 1048576
+
+# Command execution rules
+commands:
+  # Commands that are always blocked
+  blocked_patterns:
+    - "curl.*\\|.*bash"
+    - "curl.*\\|.*sh"
+    - "wget.*\\|.*bash"
+    - "wget.*\\|.*sh"
+    - "scp .* :"
+    - "rsync .* :"
+    - "nc -e"
+    - "netcat -e"
+    - "python.*-c.*import.*socket"
+    - "bash.*-c.*nc"
+    - "cat.*\\.ssh"
+    - "cat.*\\.aws"
+    - "cat.*\\.env"
+    - "cat.*credentials"
+    - "base64.*\\|.*curl"
+    - "curl.*-d.*@"
+
+  # Commands that require approval
+  approval_required:
+    - "chmod"
+    - "chown"
+    - "rm -rf"
+    - "sudo"
+
+# Content inspection rules
+content_inspection:
+  # Enabled by default for all outbound data
+  enabled: true
+
+  # Patterns that indicate sensitive data in content being sent externally
+  sensitive_content_patterns:
+    - name: "SSH Private Key"
+      pattern: "-----BEGIN (RSA |EC |ED25519 )?PRIVATE KEY-----"
+      severity: "critical"
+    - name: "SSH Public Key"
+      pattern: "-----BEGIN (RSA |EC |ED25519 )?PUBLIC KEY-----"
+      severity: "high"
+    - name: "AWS Access Key"
+      pattern: "AKIA[0-9A-Z]{16}"
+      severity: "critical"
+    - name: "AWS Secret Key"
+      pattern: "(?i)aws_secret_access_key\\s*=[^\\s]+"
+      severity: "critical"
+    - name: "Generic API Token"
+      pattern: "(?i)(api[_-]?key|token|secret)\\s*[:=]\\s*['\"]?[A-Za-z0-9_\\-]{20,}"
+      severity: "high"
+    - name: "JWT Token"
+      pattern: "eyJ[A-Za-z0-9_-]*\\.eyJ[A-Za-z0-9_-]*\\.[A-Za-z0-9_-]*"
+      severity: "medium"
+    - name: "Private Key Block"
+      pattern: "-----BEGIN (?:DSA |EC |RSA |OPENSSH )?PRIVATE KEY(?: BLOCK)?-----"
+      severity: "critical"
+    - name: "Password in Config"
+      pattern: "(?i)(password|passwd|pwd)\\s*[:=]\\s*['\"]?[A-Za-z0-9!@#$%^&*()_+\\-]{6,}"
+      severity: "high"
+    - name: "Database Connection String"
+      pattern: "(?i)(mongodb|postgres|mysql|redis)://[^\\s:]+:[^\\s:]+@[^\\s]+"
+      severity: "critical"
+    - name: "GitHub Token"
+      pattern: "ghp_[A-Za-z0-9]{36}"
+      severity: "critical"
+    - name: "GitHub Fine-grained Token"
+      pattern: "github_pat_[A-Za-z0-9_]{82}"
+      severity: "critical"
+    - name: "npm Token"
+      pattern: "npm_[A-Za-z0-9]{36}"
+      severity: "high"
+    - name: "Slack Token"
+      pattern: "xox[baprs]-[A-Za-z0-9\\-]+"
+      severity: "high"
+    - name: "Stripe Secret Key"
+      pattern: "sk_live_[A-Za-z0-9]{24,}"
+      severity: "critical"
+
+# Action correlation rules
+correlation:
+  # Time window (seconds) for correlating related actions
+  window_seconds: 30
+
+  # Sequences that indicate potential exfiltration
+  suspicious_sequences:
+    - name: "Read secrets then send externally"
+      pattern:
+        - action: "read_file"
+          condition: "sensitive"
+        - action: "http_request"
+          condition: "outbound"
+      severity: "critical"
+    - name: "Read SSH then curl"
+      pattern:
+        - action: "read_file"
+          condition: "ssh_related"
+        - action: "execute_command"
+          condition: "network_related"
+      severity: "critical"
+    - name: "Base64 encode then send"
+      pattern:
+        - action: "execute_command"
+          condition: "base64_encode"
+        - action: "http_request"
+          condition: "outbound"
+      severity: "critical"
+    - name: "Cat sensitive file then network"
+      pattern:
+        - action: "execute_command"
+          condition: "cat_sensitive"
+        - action: "http_request"
+          condition: "outbound"
+      severity: "critical"
+
+# Alert configuration
+alerts:
+  # Log all blocked actions to file
+  log_file: "agent_firewall.log"
+
+  # Send desktop notification (requires notify-send on Linux)
+  desktop_notify: true
+
+  # Webhook URL for alerts (optional)
+  webhook_url: ""
+
+  # Minimum severity to alert on: low, medium, high, critical
+  min_severity: "medium"
