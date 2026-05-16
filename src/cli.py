@@ -20,9 +20,6 @@ def serve(args: argparse.Namespace) -> None:
 
     import uvicorn
 
-    from src.detection.inspector import ContentInspector
-    from src.policy.engine import PolicyEngine
-
     logging.basicConfig(
         level=getattr(logging, args.log_level.upper(), logging.INFO),
         format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
@@ -47,7 +44,6 @@ def mcp(args: argparse.Namespace) -> None:
 
     from src.detection.inspector import ActionRequest, ActionType, ContentInspector
     from src.policy.engine import PolicyEngine
-    from src.proxy.handlers import ActionHandler
 
     logging.basicConfig(
         level=getattr(logging, args.log_level.upper(), logging.WARNING),
@@ -66,7 +62,6 @@ def mcp(args: argparse.Namespace) -> None:
     logger.info("Loading policy from %s", config_path)
     policy = PolicyEngine.from_yaml(str(config_path))
     inspector = ContentInspector(policy)
-    handler = ActionHandler(policy, inspector)
 
     mcp_server = FastMCP("Agent Firewall")
 
@@ -136,7 +131,7 @@ def mcp(args: argparse.Namespace) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Agent Firewall - Protection against AI agent prompt injection and data exfiltration",
+        description="Agent Firewall - AI agent prompt injection and data exfiltration protection",
     )
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
