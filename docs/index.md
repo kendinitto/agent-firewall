@@ -23,25 +23,38 @@ Agent -> [Agent Firewall MCP] -> External Resources
 
 ## Installation
 
-### From Source
+### From Source (Recommended)
 
 ```bash
-git clone git@github.com:kendinitto/agent-firewall.git
+git clone https://github.com/kendinitto/agent-firewall.git
 cd agent-firewall
-python -m venv .venv
-source .venv/bin/activate
-pip install .
+uv tool install .
+```
+
+This installs the `agent-firewall` binary to `~/.local/bin` (same pattern as Serena), so opencode can find it.
+
+### pip
+
+```bash
+git clone https://github.com/kendinitto/agent-firewall.git
+cd agent-firewall
+pip3 install .
 ```
 
 ### Development
 
 ```bash
-git clone git@github.com:kendinitto/agent-firewall.git
+git clone https://github.com/kendinitto/agent-firewall.git
 cd agent-firewall
 python -m venv .venv
 source .venv/bin/activate
 pip install -e ".[dev]"
 ```
+
+> **Note:** When using a venv, opencode needs the full path to the binary in its config:
+> ```json
+> "command": ["/path/to/agent-firewall/.venv/bin/agent-firewall", "mcp"]
+> ```
 
 ## CLI Usage
 

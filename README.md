@@ -7,9 +7,17 @@ Protection against AI agent prompt injection and data exfiltration. A framework-
 ```bash
 git clone https://github.com/kendinitto/agent-firewall.git
 cd agent-firewall
-python -m venv .venv
-source .venv/bin/activate
-pip install .
+uv tool install .
+```
+
+This installs `agent-firewall` to `~/.local/bin` (same pattern as Serena).
+
+### pip
+
+```bash
+git clone https://github.com/kendinitto/agent-firewall.git
+cd agent-firewall
+pip3 install .
 ```
 
 ## Usage

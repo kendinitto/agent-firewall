@@ -57,7 +57,10 @@ def config(args: argparse.Namespace) -> None:
         },
     }
 
-    print("# Add this to ~/.config/opencode/opencode.json:")
+    print("# Add this to ~/.config/opencode/opencode.json")
+    print("#")
+    print("# If you installed with a venv, replace 'agent-firewall' with")
+    print("# the full path to the binary (e.g., ~/.venv/bin/agent-firewall)")
     print()
     print(json.dumps(config_snippet, indent=2))
 
