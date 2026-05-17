@@ -14,6 +14,14 @@ pip install .
 
 ## Usage
 
+### Get Config Snippet
+
+```bash
+agent-firewall config
+```
+
+Prints the opencode.json snippet to copy-paste.
+
 ### MCP Server (for opencode integration)
 
 Start the MCP server:

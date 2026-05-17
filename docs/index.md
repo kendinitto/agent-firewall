@@ -66,6 +66,14 @@ agent-firewall serve --port 8080
 | `--config` | configs/policy.yaml | Path to policy YAML |
 | `--log-level` | warning | Log level (debug, info, warning, error) |
 
+### Print Config Snippet
+
+```bash
+agent-firewall config
+```
+
+Prints the opencode.json snippet to copy-paste.
+
 ### Environment Variables
 
 | Variable | Description |
