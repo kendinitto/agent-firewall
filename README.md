@@ -5,7 +5,11 @@ Protection against AI agent prompt injection and data exfiltration. A framework-
 ## Installation
 
 ```bash
-pip install agent-firewall
+git clone https://github.com/kendinitto/agent-firewall.git
+cd agent-firewall
+python -m venv .venv
+source .venv/bin/activate
+pip install .
 ```
 
 ## Usage

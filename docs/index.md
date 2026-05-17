@@ -23,10 +23,14 @@ Agent -> [Agent Firewall MCP] -> External Resources
 
 ## Installation
 
-### pip (Recommended)
+### From Source
 
 ```bash
-pip install agent-firewall
+git clone git@github.com:kendinitto/agent-firewall.git
+cd agent-firewall
+python -m venv .venv
+source .venv/bin/activate
+pip install .
 ```
 
 ### Development
