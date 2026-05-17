@@ -35,7 +35,7 @@ def _initialize(config_path: str | Path | None = None) -> None:
         config_path = Path("configs/policy.yaml")
     config_path = Path(config_path)
     if not config_path.exists():
-        config_path = Path(__file__).parent.parent.parent / "configs" / "policy.yaml"
+        config_path = Path(__file__).parent.parent / "configs" / "policy.yaml"
 
     logger.info("Loading policy from %s", config_path)
     _policy_engine = PolicyEngine.from_yaml(str(config_path))

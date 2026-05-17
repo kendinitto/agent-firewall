@@ -48,7 +48,7 @@ dev = [
 packages = ["src"]
 
 [tool.hatch.build.targets.wheel.force-include]
-"configs/policy.yaml" = "agent_firewall_configs/policy.yaml"
+"configs/policy.yaml" = "src/configs/policy.yaml"
 
 [tool.ruff]
 line-length = 100
