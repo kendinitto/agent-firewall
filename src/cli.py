@@ -3,6 +3,7 @@
 Usage:
     agent-firewall serve [--port PORT] [--host HOST] [--config PATH]
     agent-firewall mcp [--config PATH] [--log-level LEVEL]
+    agent-firewall config
 """
 
 from __future__ import annotations
@@ -35,6 +36,30 @@ def serve(args: argparse.Namespace) -> None:
         port=args.port,
         log_level=args.log_level,
     )
+
+
+def config(args: argparse.Namespace) -> None:
+    """Print opencode.json config snippet."""
+
+    import json
+
+    config_snippet = {
+        "mcp": {
+            "firewall": {
+                "type": "local",
+                "command": ["agent-firewall", "mcp"],
+                "enabled": True,
+                "timeout": 30000,
+            }
+        },
+        "permission": {
+            "bash": "deny",
+        },
+    }
+
+    print("# Add this to ~/.config/opencode/opencode.json:")
+    print()
+    print(json.dumps(config_snippet, indent=2))
 
 
 def mcp(args: argparse.Namespace) -> None:
@@ -147,12 +172,17 @@ def main() -> None:
     mcp_parser.add_argument("--config", default=None, help="Path to policy YAML")
     mcp_parser.add_argument("--log-level", default="warning", help="Log level")
 
+    # config subcommand
+    subparsers.add_parser("config", help="Print opencode.json config snippet")
+
     args = parser.parse_args()
 
     if args.command == "serve":
         serve(args)
     elif args.command == "mcp":
         mcp(args)
+    elif args.command == "config":
+        config(args)
     else:
         parser.print_help()
         sys.exit(1)
